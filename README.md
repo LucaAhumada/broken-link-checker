@@ -9,6 +9,8 @@ A Node.js tool to crawl websites and check for broken links. This tool helps you
 - Configurable crawling depth and concurrency
 - Supports both relative and absolute URLs
 - Color-coded console output for better visibility
+- Automatic retry mechanism for failed requests
+- Configurable exclusion patterns for URLs
 
 ## Prerequisites
 
@@ -32,7 +34,11 @@ npm install
 
 ## Usage
 
-1. Configure your settings in `src/config/config.js`
+1. Configure your settings in `src/config/config.json`:
+
+   - Set your target website URL in `startUrl`
+   - Adjust crawling parameters like `maxDepth`, `timeout`, etc.
+   - Configure report output location in `outputFile`
 
 2. Run the crawler:
 
@@ -40,13 +46,12 @@ npm install
 npm run crawl
 ```
 
-3. Generate the report:
+The crawler will:
 
-```bash
-npm run report
-```
-
-The report will be generated as `report.html` in the project root directory.
+- Start crawling from the configured URL
+- Check all links it finds
+- Generate an HTML report automatically
+- Save the report to the configured location (default: `reports/crawl-report.html`)
 
 ## Project Structure
 
@@ -54,18 +59,34 @@ The report will be generated as `report.html` in the project root directory.
 broken-link-checker/
 ├── src/
 │   ├── config/        # Configuration files
+│   │   └── config.json  # Main configuration file
 │   ├── utils/         # Utility functions
-│   ├── crawler.js     # Main crawler implementation
-│   └── generate-report.js  # Report generation
+│   │   ├── logger.js    # Logging utilities
+│   │   └── generate-report.js  # Report generation
+│   └── crawler.js     # Main crawler implementation
+├── reports/           # Generated reports directory
 ├── package.json       # Project dependencies and scripts
-├── report.html        # Generated report
 └── README.md         # This file
 ```
+
+## Configuration Options
+
+The following options can be configured in `src/config/config.json`:
+
+- `startUrl`: The URL to start crawling from
+- `maxDepth`: Maximum depth to crawl (default: 2)
+- `timeout`: Request timeout in milliseconds (default: 10000)
+- `followRedirects`: Whether to follow redirects (default: true)
+- `checkExternalLinks`: Whether to check external links (default: false)
+- `userAgent`: User agent string for requests
+- `excludePatterns`: Array of URL patterns to exclude
+- `outputFile`: Path to save the report (default: "reports/crawl-report.html")
+- `retryCount`: Number of retries for failed requests (default: 2)
+- `retryDelay`: Delay between retries in milliseconds (default: 1000)
 
 ## Dependencies
 
 - axios: For making HTTP requests
-- chalk: For colored console output
 - cheerio: For parsing HTML
 
 ## Contributing
