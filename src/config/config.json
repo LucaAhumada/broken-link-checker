@@ -1,0 +1,12 @@
+{
+  "startUrl": "https://example.com",
+  "maxDepth": 2,
+  "timeout": 10000,
+  "followRedirects": true,
+  "checkExternalLinks": false,
+  "userAgent": "BrokenLinksCrawler/1.0 (+https://github.com/LucaAhumada/broken-link-checker.git; bot@example.com)",
+  "excludePatterns": ["mailto:", "tel:", "javascript:", "#"],
+  "outputFile": "reports/crawl-report.html",
+  "retryCount": 2,
+  "retryDelay": 1000
+}
