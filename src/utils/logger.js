@@ -1,20 +1,30 @@
 const chalk = require("chalk").default;
 
+const getDurationColor = (duration) => {
+  if (duration <= 500) return chalk.green;
+  if (duration <= 1500) return chalk.yellow;
+  if (duration <= 3000) return chalk.hex('#FFA500'); // Orange
+  return chalk.red;
+};
+
 module.exports = {
   logCrawling: (url, depth) => {
     console.log(chalk.blue(`🌐 [Depth ${depth}] Crawling: ${url}`));
   },
 
-  logOk: (url, status) => {
-    console.log(chalk.green(`✅ [${status}] OK - ${url}`));
+  logOk: (url, status, duration) => {
+    const durationColor = getDurationColor(duration);
+    console.log(chalk.green(`✅ [${status}] OK - ${url} (${durationColor(duration)}ms)`));
   },
 
-  logBroken: (url, status, source) => {
-    console.log(chalk.red(`❌ [${status}] BROKEN - ${url} (found on ${source})`));
+  logBroken: (url, status, source, duration) => {
+    const durationColor = getDurationColor(duration);
+    console.log(chalk.red(`❌ [${status}] BROKEN - ${url} (${durationColor(duration)}ms) (found on ${source})`));
   },
 
-  logFailed: (url, message, source) => {
-    console.log(chalk.yellow(`⚠️  FAILED - ${url} (${message}) (found on ${source})`));
+  logFailed: (url, message, source, duration) => {
+    const durationColor = getDurationColor(duration);
+    console.log(chalk.yellow(`⚠️  FAILED - ${url} (${message}) (${durationColor(duration)}ms) (found on ${source})`));
   },
 
   logInfo: (msg) => {

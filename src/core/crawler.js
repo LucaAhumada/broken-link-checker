@@ -13,20 +13,23 @@ class Crawler {
   }
 
   async checkLink(link, sourcePage) {
+    const startTime = Date.now();
     try {
       const response = await httpHandler.checkLink(link);
       const status = response.status;
+      const duration = Date.now() - startTime;
 
       if (status >= 400) {
-        logBroken(link, status, sourcePage);
-        reportManager.addBrokenLink(link, status, sourcePage);
+        logBroken(link, status, sourcePage, duration);
+        reportManager.addBrokenLink(link, status, sourcePage, duration);
       } else {
-        logOk(link, status);
-        reportManager.addOkLink(link, status, sourcePage);
+        logOk(link, status, duration);
+        reportManager.addOkLink(link, status, sourcePage, duration);
       }
     } catch (err) {
-      logFailed(link, err.message, sourcePage);
-      reportManager.addFailedLink(link, err.message, sourcePage);
+      const duration = Date.now() - startTime;
+      logFailed(link, err.message, sourcePage, duration);
+      reportManager.addFailedLink(link, err.message, sourcePage, duration);
     }
   }
 

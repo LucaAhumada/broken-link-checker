@@ -17,10 +17,20 @@ const generateTable = (title, links, color, emoji) => {
     `;
   }
 
+  const getDurationClass = (duration) => {
+    if (duration <= 500) return 'duration-fast';
+    if (duration <= 1500) return 'duration-medium';
+    if (duration <= 3000) return 'duration-slow';
+    return 'duration-very-slow';
+  };
+
   const rows = links.map(link => `
     <tr>
       <td class="url-cell">
         <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.url}</a>
+      </td>
+      <td class="duration-cell ${getDurationClass(link.duration)}">
+        ${link.duration}ms
       </td>
       <td class="status-cell">
         <span class="status-badge ${link.status >= 400 ? 'error' : 'success'}">${link.status}</span>
@@ -44,6 +54,7 @@ const generateTable = (title, links, color, emoji) => {
             <thead>
               <tr>
                 <th>Link</th>
+                <th>Duration</th>
                 <th>Status</th>
                 <th>Source Page</th>
               </tr>
@@ -211,6 +222,29 @@ const generateReport = (report) => {
       text-align: left;
       font-weight: 600;
       color: var(--primary-color);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .data-table th:hover {
+      background-color: #e9ecef;
+    }
+
+    .data-table th.sortable::after {
+      content: '↕';
+      position: absolute;
+      right: 8px;
+      color: #999;
+    }
+
+    .data-table th.sort-asc::after {
+      content: '↑';
+      color: var(--primary-color);
+    }
+
+    .data-table th.sort-desc::after {
+      content: '↓';
+      color: var(--primary-color);
     }
 
     .data-table td {
@@ -252,6 +286,26 @@ const generateReport = (report) => {
     .status-badge.error {
       background-color: #f8d7da;
       color: #721c24;
+    }
+
+    .duration-cell {
+      font-weight: 500;
+    }
+
+    .duration-fast {
+      color: #2ecc71;
+    }
+
+    .duration-medium {
+      color: #f39c12;
+    }
+
+    .duration-slow {
+      color: #e67e22;
+    }
+
+    .duration-very-slow {
+      color: #e74c3c;
     }
 
     .empty-state {
@@ -326,6 +380,54 @@ const generateReport = (report) => {
       document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', function() {
           this.classList.toggle('collapsed');
+        });
+      });
+
+      // Add sorting functionality to tables
+      document.querySelectorAll('.data-table th').forEach(header => {
+        header.classList.add('sortable');
+        header.addEventListener('click', function() {
+          const table = this.closest('table');
+          const tbody = table.querySelector('tbody');
+          const rows = Array.from(tbody.querySelectorAll('tr'));
+          const index = Array.from(this.parentElement.children).indexOf(this);
+          const isAsc = this.classList.contains('sort-asc');
+          
+          // Remove sort classes from all headers
+          table.querySelectorAll('th').forEach(th => {
+            th.classList.remove('sort-asc', 'sort-desc');
+          });
+          
+          // Sort rows
+          rows.sort((a, b) => {
+            const aValue = a.children[index].textContent.trim();
+            const bValue = b.children[index].textContent.trim();
+            
+            // Special handling for duration column
+            if (index === 1) {
+              const aNum = parseInt(aValue);
+              const bNum = parseInt(bValue);
+              return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            
+            // Special handling for status column
+            if (index === 2) {
+              const aNum = parseInt(aValue);
+              const bNum = parseInt(bValue);
+              return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            
+            // Default string comparison
+            return isAsc 
+              ? aValue.localeCompare(bValue)
+              : bValue.localeCompare(aValue);
+          });
+          
+          // Update sort class
+          this.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
+          
+          // Reorder rows
+          rows.forEach(row => tbody.appendChild(row));
         });
       });
     });
