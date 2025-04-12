@@ -15,16 +15,16 @@ class ReportManager {
     };
   }
 
-  addOkLink(url, status, source) {
-    this.report.ok.push({ url, status, source });
+  addOkLink(url, status, source, duration) {
+    this.report.ok.push({ url, status, source, duration });
   }
 
-  addBrokenLink(url, status, source) {
-    this.report.broken.push({ url, status, source });
+  addBrokenLink(url, status, source, duration) {
+    this.report.broken.push({ url, status, source, duration });
   }
 
-  addFailedLink(url, message, source) {
-    this.report.failed.push({ url, status: "error", message, source });
+  addFailedLink(url, message, source, duration) {
+    this.report.failed.push({ url, status: "error", message, source, duration });
   }
 
   getReport() {
