@@ -1,0 +1,92 @@
+const cheerio = require("cheerio");
+const { logInfo, logBroken, logOk, logFailed, logSummary } = require("../utils/logger");
+const configManager = require("../config/config-manager");
+const urlHandler = require("./url-handler");
+const httpHandler = require("./http-handler");
+const reportManager = require("./report-manager");
+
+class Crawler {
+  constructor() {
+    this.config = configManager.getConfig();
+    this.visitedPages = new Map();
+    this.checkedLinks = new Set();
+  }
+
+  async checkLink(link, sourcePage) {
+    try {
+      const response = await httpHandler.checkLink(link);
+      const status = response.status;
+
+      if (status >= 400) {
+        logBroken(link, status, sourcePage);
+        reportManager.addBrokenLink(link, status, sourcePage);
+      } else {
+        logOk(link, status);
+        reportManager.addOkLink(link, status, sourcePage);
+      }
+    } catch (err) {
+      logFailed(link, err.message, sourcePage);
+      reportManager.addFailedLink(link, err.message, sourcePage);
+    }
+  }
+
+  async crawl(url, depth = 0) {
+    const existingDepth = this.visitedPages.get(url);
+
+    if (existingDepth !== undefined && depth >= existingDepth) return;
+    if (depth > this.config.maxDepth) return;
+
+    this.visitedPages.set(url, depth);
+
+    let html;
+    try {
+      const res = await httpHandler.makeRequest(url);
+      html = res.data;
+    } catch (err) {
+      logFailed(url, err.message, "root");
+      return;
+    }
+
+    const $ = cheerio.load(html);
+    const links = $("a")
+      .map((_, el) => $(el).attr("href"))
+      .get()
+      .filter(Boolean);
+
+    for (let link of links) {
+      if (urlHandler.shouldExclude(link)) continue;
+
+      const fullUrl = urlHandler.normalizeUrl(link, url);
+      if (!fullUrl || this.checkedLinks.has(fullUrl)) continue;
+
+      this.checkedLinks.add(fullUrl);
+
+      const internal = urlHandler.isInternal(fullUrl);
+
+      if (internal || this.config.checkExternalLinks) {
+        await this.checkLink(fullUrl, url);
+      }
+
+      if (internal) {
+        await this.crawl(fullUrl, depth + 1);
+      }
+    }
+  }
+
+  async start() {
+    try {
+      logInfo(`Starting crawl at: ${this.config.startUrl}`);
+      await this.crawl(this.config.startUrl);
+      logSummary(reportManager.getReport());
+      reportManager.saveReport();
+      logInfo("Crawl complete.");
+    } catch (error) {
+      logInfo(`\nCrawl failed: ${error.message}`);
+      logInfo('Generating partial report...');
+      reportManager.saveReport();
+      process.exit(1);
+    }
+  }
+}
+
+module.exports = new Crawler(); 
