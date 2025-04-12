@@ -9,6 +9,8 @@
 
 A robust Node.js tool to crawl websites and check for broken links. This tool helps you identify and fix broken links on your website by generating detailed reports, ensuring your website maintains optimal link health.
 
+[Live Report Example](https://broken-link-checker-report-example.vercel.app)
+
 ![broken-link-checker](https://github.com/user-attachments/assets/ab1e41e4-e0c0-4934-9633-43bbcb1ca0e1)
 
 
