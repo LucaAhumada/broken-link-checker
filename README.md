@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://badge.fury.io/js/broken-link-checker.svg)](https://badge.fury.io/js/broken-link-checker)
 
-# 🚀 Like this project? Show your support! ![GitHub Repo stars](https://img.shields.io/github/stars/LucaAhumada/broken-link-checker?style=social)
+# 🚀 Like this project? Give a Star! ⭐️
 
 
 A robust Node.js tool to crawl websites and check for broken links. This tool helps you identify and fix broken links on your website by generating detailed reports, ensuring your website maintains optimal link health.
