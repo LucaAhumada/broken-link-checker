@@ -3,6 +3,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const { URL } = require("url");
 const path = require("path");
+const { exec } = require("child_process");
 const {
   logInfo,
   logCrawling,
@@ -24,6 +25,51 @@ const report = {
   broken: [],
   failed: []
 };
+
+// Function to open the report in the default browser
+function openReport(filePath) {
+  const platform = process.platform;
+  let command;
+
+  switch (platform) {
+    case 'darwin': // macOS
+      command = `open "${filePath}"`;
+      break;
+    case 'win32': // Windows
+      command = `start "" "${filePath}"`;
+      break;
+    default: // Linux and others
+      command = `xdg-open "${filePath}"`;
+  }
+
+  exec(command, (error) => {
+    if (error) {
+      logInfo(`Failed to open report: ${error.message}`);
+    }
+  });
+}
+
+// Function to generate and save the report
+function saveReport() {
+  if (config.outputFile) {
+    try {
+      // Create reports directory if it doesn't exist
+      const reportDir = path.dirname(config.outputFile);
+      if (!fs.existsSync(reportDir)) {
+        fs.mkdirSync(reportDir, { recursive: true });
+      }
+      
+      const reportContent = generateReport(report);
+      fs.writeFileSync(config.outputFile, reportContent);
+      logInfo(`Report saved to ${config.outputFile}`);
+      
+      // Open the report in the default browser
+      openReport(config.outputFile);
+    } catch (error) {
+      logInfo(`Failed to save report: ${error.message}`);
+    }
+  }
+}
 
 async function retryRequest(requestFn, retries = config.retryCount, delay = config.retryDelay) {
   let lastError;
@@ -128,22 +174,37 @@ async function crawl(url, depth = 0) {
   }
 }
 
+// Handle process termination
+process.on('SIGINT', () => {
+  logInfo('\nScan interrupted. Generating partial report...');
+  saveReport();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  logInfo('\nScan terminated. Generating partial report...');
+  saveReport();
+  process.exit(0);
+});
+
+process.on('uncaughtException', (error) => {
+  logInfo(`\nUnexpected error: ${error.message}`);
+  logInfo('Generating partial report...');
+  saveReport();
+  process.exit(1);
+});
+
 (async () => {
-  logInfo(`Starting crawl at: ${config.startUrl}`);
-  await crawl(config.startUrl);
-  logSummary(report);
-
-  if (config.outputFile) {
-    // Create reports directory if it doesn't exist
-    const reportDir = path.dirname(config.outputFile);
-    if (!fs.existsSync(reportDir)) {
-      fs.mkdirSync(reportDir, { recursive: true });
-    }
-    
-    const reportContent = generateReport(report);
-    fs.writeFileSync(config.outputFile, reportContent);
-    logInfo(`Report saved to ${config.outputFile}`);
+  try {
+    logInfo(`Starting crawl at: ${config.startUrl}`);
+    await crawl(config.startUrl);
+    logSummary(report);
+    saveReport();
+    logInfo("Crawl complete.");
+  } catch (error) {
+    logInfo(`\nCrawl failed: ${error.message}`);
+    logInfo('Generating partial report...');
+    saveReport();
+    process.exit(1);
   }
-
-  logInfo("Crawl complete.");
 })();
