@@ -9,7 +9,8 @@
 
 A robust Node.js tool to crawl websites and check for broken links. This tool helps you identify and fix broken links on your website by generating detailed reports, ensuring your website maintains optimal link health.
 
-![broken-link-checker](https://github.com/user-attachments/assets/a636ee52-734a-4aaa-adaa-2bc9ed9c6119)
+![broken-link-checker](https://github.com/user-attachments/assets/ab1e41e4-e0c0-4934-9633-43bbcb1ca0e1)
+
 
 ## ✨ Features
 
