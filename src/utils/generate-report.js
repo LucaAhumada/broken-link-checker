@@ -24,6 +24,21 @@ const generateTable = (title, links, color, emoji) => {
     return 'duration-very-slow';
   };
 
+  // Get unique status codes from the links
+  const statusCodes = [...new Set(links.map(link => link.status))].sort((a, b) => a - b);
+  
+  // Generate status code options
+  const statusOptions = statusCodes.map(code => {
+    const statusText = {
+      200: 'OK',
+      301: 'Moved Permanently',
+      302: 'Found',
+      404: 'Not Found',
+      500: 'Server Error'
+    }[code] || `Status ${code}`;
+    return `<option value="${code}">${code} - ${statusText}</option>`;
+  }).join('');
+
   const rows = links.map(link => `
     <tr>
       <td class="url-cell">
@@ -50,6 +65,26 @@ const generateTable = (title, links, color, emoji) => {
       </div>
       <div class="collapse show" id="${title.toLowerCase().replace(/\s+/g, '-')}-section">
         <div class="table-container">
+          <div class="table-controls mb-3">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                  </span>
+                  <input type="text" class="form-control" id="searchInput" placeholder="Search URLs...">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <select class="form-select" id="statusFilter">
+                  <option value="">Filter Status Codes</option>
+                  ${statusOptions}
+                </select>
+              </div>
+            </div>
+          </div>
           <table class="data-table">
             <thead>
               <tr>
@@ -343,7 +378,7 @@ const generateReport = (report) => {
 <body>
   <div class="container">
     <div class="header text-center">
-      <h1>🔗 Broken Link Crawler Report</h1>
+      <h1>🔗 Broken Link Checker Report</h1>
     </div>
 
     <div class="stats-container">
@@ -382,6 +417,30 @@ const generateReport = (report) => {
           this.classList.toggle('collapsed');
         });
       });
+
+      // Add search and filter functionality
+      const searchInput = document.getElementById('searchInput');
+      const statusFilter = document.getElementById('statusFilter');
+      const table = document.querySelector('.data-table');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+
+      function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusCode = statusFilter.value;
+
+        rows.forEach(row => {
+          const url = row.querySelector('.url-cell').textContent.toLowerCase();
+          const status = row.querySelector('.status-badge').textContent.trim();
+          const matchesSearch = url.includes(searchTerm);
+          const matchesStatus = !statusCode || status.startsWith(statusCode);
+
+          row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+        });
+      }
+
+      searchInput.addEventListener('input', filterTable);
+      statusFilter.addEventListener('change', filterTable);
 
       // Add sorting functionality to tables
       document.querySelectorAll('.data-table th').forEach(header => {
