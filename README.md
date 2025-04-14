@@ -39,6 +39,7 @@ A robust Node.js tool to crawl websites and check for broken links. This tool he
 - [Installation](#installation)
 - [Usage](#usage)
 - [Configuration](#configuration)
+- [Testing](#testing)
 - [Export Options](#export-options)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
@@ -103,6 +104,35 @@ The following options can be configured in `src/config/config.json`:
 | `outputFile` | Path to save the report | "reports/crawl-report.html" |
 | `retryCount` | Number of retries for failed requests | 2 |
 | `retryDelay` | Delay between retries in milliseconds | 1000 |
+
+## Testing
+
+The project uses Jest as its testing framework, providing comprehensive test coverage for all major components. The test suite includes:
+
+- Unit tests for core functionality
+- Integration tests for component interactions
+- Mock implementations for external dependencies
+
+### Test Commands
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode (useful during development)
+npm run test:watch
+
+# Generate test coverage report
+npm run test:coverage
+
+# Run tests with verbose output
+npm run test:verbose
+```
+
+The test suite is organized in the `src/__tests__` directory, mirroring the structure of the source code:
+- `core/`: Tests for core functionality
+- `utils/`: Tests for utility functions
+- `config/`: Tests for configuration management
 
 ## Export Options
 
