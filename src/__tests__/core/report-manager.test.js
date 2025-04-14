@@ -5,10 +5,14 @@ const { exec } = require('child_process');
 // Mock dependencies first
 jest.mock('fs');
 jest.mock('child_process');
-jest.mock('../../utils/generate-report');
 jest.mock('../../utils/logger', () => ({
   logInfo: jest.fn()
 }));
+
+// Mock generate-report module
+jest.mock('../../utils/generate-report', () => {
+  return jest.fn().mockReturnValue('Mock report content');
+});
 
 // Mock config manager before requiring report manager
 jest.mock('../../config/config-manager', () => {
@@ -52,7 +56,6 @@ describe('ReportManager', () => {
       broken: [],
       failed: []
     };
-    generateReport.mockReturnValue('Mock report content');
   });
 
   describe('addLink methods', () => {
