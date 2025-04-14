@@ -147,6 +147,58 @@ describe('Crawler', () => {
         expect.any(Number)
       );
     });
+
+    it('should skip excluded links', async () => {
+      urlHandler.shouldExclude.mockReturnValueOnce(true);
+      httpHandler.makeRequest.mockResolvedValueOnce({ 
+        data: '<html><a href="/excluded">Excluded</a></html>' 
+      });
+      
+      await crawler.crawl(configManager.getConfig().startUrl);
+      
+      expect(urlHandler.normalizeUrl).not.toHaveBeenCalled();
+    });
+
+    it('should skip invalid URLs', async () => {
+      urlHandler.normalizeUrl.mockReturnValueOnce(null);
+      httpHandler.makeRequest.mockResolvedValueOnce({ 
+        data: '<html><a href="invalid">Invalid</a></html>' 
+      });
+      
+      await crawler.crawl(configManager.getConfig().startUrl);
+      
+      expect(httpHandler.checkLink).not.toHaveBeenCalled();
+    });
+
+    it('should skip already checked links', async () => {
+      const fullUrl = `${configManager.getConfig().startUrl}/checked`;
+      urlHandler.normalizeUrl.mockReturnValueOnce(fullUrl);
+      crawler.checkedLinks.add(fullUrl);
+      httpHandler.makeRequest.mockResolvedValueOnce({ 
+        data: '<html><a href="/checked">Checked</a></html>' 
+      });
+      
+      await crawler.crawl(configManager.getConfig().startUrl);
+      
+      expect(httpHandler.checkLink).not.toHaveBeenCalled();
+    });
+
+    it('should check external links when configured', async () => {
+      const config = configManager.getConfig();
+      config.checkExternalLinks = true;
+      crawler.config = config;
+      
+      const externalUrl = 'https://external.com';
+      urlHandler.normalizeUrl.mockReturnValueOnce(externalUrl);
+      urlHandler.isInternal.mockReturnValueOnce(false);
+      httpHandler.makeRequest.mockResolvedValueOnce({ 
+        data: '<html><a href="https://external.com">External</a></html>' 
+      });
+      
+      await crawler.crawl(configManager.getConfig().startUrl);
+      
+      expect(httpHandler.checkLink).toHaveBeenCalledWith(externalUrl);
+    });
   });
 
   describe('start', () => {
