@@ -3,6 +3,7 @@
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://badge.fury.io/js/broken-link-checker.svg)](https://badge.fury.io/js/broken-link-checker)
+[![codecov](https://codecov.io/gh/LucaAhumada/broken-link-checker/branch/main/graph/badge.svg)](https://codecov.io/gh/LucaAhumada/broken-link-checker)
 
 # 🚀 Like this project? Give a Star! ⭐️
 
