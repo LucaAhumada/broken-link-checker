@@ -46,8 +46,10 @@ class Crawler {
       const res = await httpHandler.makeRequest(url);
       html = res.data;
     } catch (err) {
-      logFailed(url, err.message, "root");
-      return;
+      const duration = Date.now();
+      logFailed(url, err.message, "root", duration);
+      reportManager.addFailedLink(url, err.message, "root", duration);
+      throw err;
     }
 
     const $ = cheerio.load(html);

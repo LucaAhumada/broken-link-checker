@@ -34,4 +34,11 @@ reports/
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Jest
+coverage/
+.jest/
+jest.config.js
+*.test.js
+*.spec.js 

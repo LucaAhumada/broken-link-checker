@@ -6,17 +6,28 @@ const configManager = require('../../config/config-manager');
 const fs = require('fs');
 const path = require('path');
 
+// Read config before setting up mocks
+const configPath = path.join(__dirname, '../../config/config.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
 // Mock dependencies
 jest.mock('../../core/http-handler');
 jest.mock('../../core/url-handler');
 jest.mock('../../core/report-manager');
-jest.mock('../../config/config-manager', () => {
-  const configPath = path.join(__dirname, '../../config/config.json');
-  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  return {
-    getConfig: jest.fn().mockReturnValue(config)
-  };
-});
+jest.mock('../../config/config-manager', () => ({
+  getConfig: jest.fn().mockReturnValue({
+    startUrl: 'https://demo.testfire.net',
+    maxDepth: 2,
+    timeout: 10000,
+    followRedirects: true,
+    checkExternalLinks: false,
+    userAgent: 'BrokenLinksCrawler/1.0',
+    excludePatterns: ['mailto:', 'tel:', 'javascript:', '#'],
+    outputFile: 'reports/crawl-report.html',
+    retryCount: 2,
+    retryDelay: 1000
+  })
+}));
 jest.mock('../../utils/logger', () => ({
   logInfo: jest.fn(),
   logBroken: jest.fn(),
@@ -106,9 +117,17 @@ describe('Crawler', () => {
     });
 
     it('should crawl internal links recursively', async () => {
-      httpHandler.makeRequest.mockResolvedValueOnce({ 
-        data: '<html><a href="/page1">Page 1</a><a href="/page2">Page 2</a></html>' 
-      });
+      // Mock the initial page and its two internal links
+      httpHandler.makeRequest
+        .mockResolvedValueOnce({ 
+          data: '<html><a href="/page1">Page 1</a><a href="/page2">Page 2</a></html>' 
+        })
+        .mockResolvedValueOnce({ 
+          data: '<html><a href="/page1">Page 1</a></html>' 
+        })
+        .mockResolvedValueOnce({ 
+          data: '<html><a href="/page2">Page 2</a></html>' 
+        });
       
       await crawler.crawl(configManager.getConfig().startUrl);
       
@@ -116,11 +135,17 @@ describe('Crawler', () => {
     });
 
     it('should handle failed page requests gracefully', async () => {
-      httpHandler.makeRequest.mockRejectedValueOnce(new Error('Failed to fetch'));
+      const error = new Error('Failed to fetch');
+      httpHandler.makeRequest.mockRejectedValueOnce(error);
       
-      await crawler.crawl(configManager.getConfig().startUrl);
+      await expect(crawler.crawl(configManager.getConfig().startUrl)).rejects.toThrow('Failed to fetch');
       
-      expect(reportManager.addFailedLink).toHaveBeenCalled();
+      expect(reportManager.addFailedLink).toHaveBeenCalledWith(
+        configManager.getConfig().startUrl,
+        error.message,
+        'root',
+        expect.any(Number)
+      );
     });
   });
 
