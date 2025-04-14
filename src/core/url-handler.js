@@ -1,3 +1,7 @@
+/**
+ * Handles URL normalization, validation, and internal/external link detection
+ * @class UrlHandler
+ */
 const { URL } = require("url");
 const configManager = require("../config/config-manager");
 
@@ -6,6 +10,12 @@ class UrlHandler {
     this.config = configManager.getConfig();
   }
 
+  /**
+   * Normalizes a URL by resolving it against a base URL if necessary
+   * @param {string} link - The URL to normalize
+   * @param {string} base - The base URL to resolve against
+   * @returns {string|null} The normalized URL or null if invalid
+   */
   normalizeUrl(link, base) {
     // First check if the link is empty or contains invalid characters
     if (!link || /[\s<>]/.test(link)) {
@@ -31,10 +41,20 @@ class UrlHandler {
     }
   }
 
+  /**
+   * Checks if a URL should be excluded based on configured patterns
+   * @param {string} link - The URL to check
+   * @returns {boolean} True if the URL should be excluded
+   */
   shouldExclude(link) {
     return this.config.excludePatterns.some(pattern => link.includes(pattern));
   }
 
+  /**
+   * Determines if a URL is internal to the target website
+   * @param {string} url - The URL to check
+   * @returns {boolean} True if the URL is internal
+   */
   isInternal(url) {
     const urlObj = new URL(url);
     const startUrlObj = new URL(this.config.startUrl);

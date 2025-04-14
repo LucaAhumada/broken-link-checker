@@ -1,3 +1,7 @@
+/**
+ * Core crawler class responsible for crawling websites and checking links
+ * @class Crawler
+ */
 const cheerio = require("cheerio");
 const { logInfo, logBroken, logOk, logFailed, logSummary } = require("../utils/logger");
 const configManager = require("../config/config-manager");
@@ -12,6 +16,11 @@ class Crawler {
     this.checkedLinks = new Set();
   }
 
+  /**
+   * Checks a single link and logs the result
+   * @param {string} link - The URL to check
+   * @param {string} sourcePage - The page where the link was found
+   */
   async checkLink(link, sourcePage) {
     const startTime = Date.now();
     try {
@@ -33,6 +42,11 @@ class Crawler {
     }
   }
 
+  /**
+   * Recursively crawls a website starting from the given URL
+   * @param {string} url - The URL to start crawling from
+   * @param {number} depth - Current depth of the crawl
+   */
   async crawl(url, depth = 0) {
     const existingDepth = this.visitedPages.get(url);
 
@@ -78,6 +92,9 @@ class Crawler {
     }
   }
 
+  /**
+   * Starts the crawling process from the configured start URL
+   */
   async start() {
     try {
       logInfo(`Starting crawl at: ${this.config.startUrl}`);
