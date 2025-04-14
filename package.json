@@ -2,7 +2,8 @@
   "dependencies": {
     "axios": "^1.8.4",
     "chalk": "^5.4.1",
-    "cheerio": "^1.0.0"
+    "cheerio": "^1.0.0",
+    "zod": "^3.24.2"
   },
   "scripts": {
     "crawl": "node ./src/index.js"
