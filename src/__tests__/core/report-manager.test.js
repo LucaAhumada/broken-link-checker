@@ -10,9 +10,9 @@ jest.mock('../../utils/logger', () => ({
 }));
 
 // Mock generate-report module
-jest.mock('../../utils/generate-report', () => {
-  return jest.fn().mockReturnValue('Mock report content');
-});
+jest.mock('../../utils/generate-report', () => ({
+  generateReport: jest.fn().mockReturnValue('Mock report content')
+}));
 
 // Mock config manager before requiring report manager
 jest.mock('../../config/config-manager', () => {
