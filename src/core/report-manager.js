@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { exec } = require("child_process");
 const { logInfo } = require("../utils/logger");
-const generateReport = require("../utils/generate-report");
+const { generateReport } = require("../utils/generate-report");
 const configManager = require("../config/config-manager");
 
 class ReportManager {
