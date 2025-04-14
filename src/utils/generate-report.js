@@ -1,10 +1,18 @@
 const fs = require("fs");
 
+const sanitizeSectionId = (title) => {
+  return title.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '--')
+    .replace(/-{3,}/g, '--');
+};
+
 const generateTable = (title, links, color, emoji) => {
   if (links.length === 0) {
+    const sectionId = sanitizeSectionId(title);
     return `
       <div class="section ${color}">
-        <div class="section-header" data-bs-toggle="collapse" data-bs-target="#${title.toLowerCase().replace(/\s+/g, '-')}-section">
+        <div class="section-header" data-bs-toggle="collapse" data-bs-target="#${sectionId}-section">
           <span class="emoji">${emoji}</span>
           <h3>${title}</h3>
           <span class="badge">${links.length}</span>
@@ -17,7 +25,7 @@ const generateTable = (title, links, color, emoji) => {
     `;
   }
 
-  const sectionId = title.toLowerCase().replace(/\s+/g, '-');
+  const sectionId = sanitizeSectionId(title);
 
   const getDurationClass = (duration) => {
     if (duration <= 500) return 'duration-fast';
@@ -697,4 +705,7 @@ const generateReport = (report) => {
   `;
 };
 
-module.exports = generateReport;
+module.exports = {
+  generateTable,
+  generateReport
+};

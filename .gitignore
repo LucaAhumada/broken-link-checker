@@ -39,6 +39,4 @@ Thumbs.db
 # Jest
 coverage/
 .jest/
-jest.config.js
-*.test.js
-*.spec.js 
+jest.config.js 
