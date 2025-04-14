@@ -2,10 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const configManager = require('../../config/config-manager');
 const configSchema = require('../../config/config.schema');
+const z = require('zod');
 
 // Mock dependencies
 jest.mock('fs');
 jest.mock('../../config/config.schema');
+
+// Mock console.error
+global.console.error = jest.fn();
 
 describe('ConfigManager', () => {
   beforeEach(() => {
@@ -62,6 +66,45 @@ describe('ConfigManager', () => {
       });
 
       expect(() => configManager.load()).toThrow('File not found');
+    });
+
+    it('should handle Zod validation errors with detailed messages', () => {
+      const invalidConfig = {
+        startUrl: 'not-a-url',
+        maxDepth: 'not-a-number'
+      };
+      
+      const mockZodError = new z.ZodError([
+        { path: ['startUrl'], message: 'Invalid URL' },
+        { path: ['maxDepth'], message: 'Expected number' }
+      ]);
+      
+      // Mock fs.readFileSync to return valid JSON
+      fs.readFileSync.mockReturnValue(JSON.stringify(invalidConfig));
+      
+      // Mock configSchema.parse to throw Zod error
+      configSchema.parse.mockImplementation(() => {
+        throw mockZodError;
+      });
+      
+      expect(() => configManager.load()).toThrow('Invalid configuration');
+      expect(console.error).toHaveBeenCalledWith('Configuration validation failed:');
+      expect(console.error).toHaveBeenCalledWith('- startUrl: Invalid URL');
+      expect(console.error).toHaveBeenCalledWith('- maxDepth: Expected number');
+    });
+
+    it('should rethrow non-Zod errors', () => {
+      const error = new Error('Unexpected error');
+      
+      // Mock fs.readFileSync to return valid JSON
+      fs.readFileSync.mockReturnValue(JSON.stringify({ startUrl: 'https://test.com' }));
+      
+      // Mock configSchema.parse to throw non-Zod error
+      configSchema.parse.mockImplementation(() => {
+        throw error;
+      });
+      
+      expect(() => configManager.load()).toThrow('Unexpected error');
     });
   });
 

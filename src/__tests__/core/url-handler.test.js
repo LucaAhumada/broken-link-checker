@@ -27,6 +27,15 @@ describe('UrlHandler', () => {
       const result = urlHandler.normalizeUrl('invalid-url', urlHandler.config.startUrl);
       expect(result).toBeNull();
     });
+
+    it('should return null for links with invalid characters', () => {
+      expect(urlHandler.normalizeUrl('invalid<url>', 'https://example.com')).toBeNull();
+      expect(urlHandler.normalizeUrl('invalid url', 'https://example.com')).toBeNull();
+    });
+
+    it('should return null for links that don\'t start with valid path characters', () => {
+      expect(urlHandler.normalizeUrl('invalid', 'https://example.com')).toBeNull();
+    });
   });
 
   describe('shouldExclude', () => {
