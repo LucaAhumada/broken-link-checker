@@ -1,5 +1,5 @@
 {
-  "startUrl": "https://example.com",
+  "startUrl": "https://demo.testfire.net",
   "maxDepth": 2,
   "timeout": 10000,
   "followRedirects": true,

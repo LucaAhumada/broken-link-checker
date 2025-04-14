@@ -6,6 +6,13 @@
     "zod": "^3.24.2"
   },
   "scripts": {
-    "crawl": "node ./src/index.js"
+    "crawl": "node ./src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
