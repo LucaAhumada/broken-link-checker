@@ -7,10 +7,27 @@ class UrlHandler {
   }
 
   normalizeUrl(link, base) {
-    try {
-      return new URL(link, base).href;
-    } catch {
+    // First check if the link is empty or contains invalid characters
+    if (!link || /[\s<>]/.test(link)) {
       return null;
+    }
+
+    try {
+      // First try to parse the link as is
+      const url = new URL(link);
+      return url.href;
+    } catch {
+      try {
+        // If that fails, try with the base URL
+        // But first check if the link starts with a valid path character
+        if (!link.startsWith('/') && !link.startsWith('./') && !link.startsWith('../')) {
+          return null;
+        }
+        const url = new URL(link, base);
+        return url.href;
+      } catch {
+        return null;
+      }
     }
   }
 
@@ -19,7 +36,10 @@ class UrlHandler {
   }
 
   isInternal(url) {
-    return new URL(url).hostname === new URL(this.config.startUrl).hostname;
+    const urlObj = new URL(url);
+    const startUrlObj = new URL(this.config.startUrl);
+    return urlObj.protocol === startUrlObj.protocol && 
+           urlObj.hostname === startUrlObj.hostname;
   }
 }
 

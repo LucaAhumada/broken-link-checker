@@ -87,7 +87,7 @@ class Crawler {
       logInfo(`\nCrawl failed: ${error.message}`);
       logInfo('Generating partial report...');
       reportManager.saveReport();
-      process.exit(1);
+      throw error;
     }
   }
 }
